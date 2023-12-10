@@ -10,8 +10,8 @@ os.system("sudo pigpiod")  # Launching GPIO library
 time.sleep(1)  # As I said it is too impatient and so if this delay is removed you will get an error
 import pigpio  # importing GPIO library
 
-ESC = 4# Connect the ESC in this GPIO pin 
-ESC1 = 6
+ESC = [4,6]# Connect the ESC in this GPIO pin 
+
 
 pi = pigpio.pi()
 pi.set_servo_pulsewidth(ESC, 0)
@@ -131,3 +131,5 @@ elif inp == "stop":
     stop()
 else:
     print("Thank You for not following the things I'm saying... now you gotta restart the program STUPID!!")
+    
+print("hello")
