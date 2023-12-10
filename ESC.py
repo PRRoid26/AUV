@@ -132,4 +132,5 @@ elif inp == "stop":
 else:
     print("Thank You for not following the things I'm saying... now you gotta restart the program STUPID!!")
     
-print("hello")
+
+print("hello world")
