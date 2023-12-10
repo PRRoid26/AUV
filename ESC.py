@@ -133,4 +133,3 @@ else:
     print("Thank You for not following the things I'm saying... now you gotta restart the program STUPID!!")
     
 
-print("hello world")
