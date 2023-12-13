@@ -68,7 +68,7 @@ def left(): #going left
     pi.set_servo_pulsewidth(ESC,speed)
     pi.set_servo_pulsewidth(ESCright,speed)
     pi.set_servo_pulsewidth(ESCleft,min_value) 
-    time.sleep(15)
+    #time.sleep(15)
     
 def right(): #going right
     
@@ -76,7 +76,7 @@ def right(): #going right
     pi.set_servo_pulsewidth(ESC,speed)
     pi.set_servo_pulsewidth(ESCright,min_value)
     pi.set_servo_pulsewidth(ESCleft,speed)
-    time.sleep(15)
+    #time.sleep(15)
     
 def forward(): #going forward
     
@@ -84,7 +84,7 @@ def forward(): #going forward
     pi.set_servo_pulsewidth(ESC,speed)
     pi.set_servo_pulsewidth(ESCright,speed)
     pi.set_servo_pulsewidth(ESCleft,speed)
-    time.sleep(15)
+    #time.sleep(15)
     
 def stop(): #This will stop every action your Pi is performing for ESC ofcourse.
     pi.set_servo_pulsewidth(ESC, 0)
