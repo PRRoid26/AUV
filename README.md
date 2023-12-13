@@ -1,4 +1,4 @@
-<h1 style="text-align:center">SAUVC</h1>
+<h1>SAUVC</h1>
 
 <h2>ESC.py</h2>
   <p>has code in python3 format</p>
