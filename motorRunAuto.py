@@ -52,39 +52,34 @@ def calibrate():   #This is the auto calibration procedure of a normal ESC
             control() # You can change this to any other function you want
             
 def neeche(): #going down
-    speed = 1500 
-    pi.set_servo_pulsewidth(ESC, speed)
-    while (speed>=1200):
-        speed-=100
-    pi.set_servo_pulsewidth(ESC, speed)
-    while(speed<200):
-        speed+=100
-        pi.set_servo_pulsewidth(ESC, speed)
-        time.sleep(2)
+    speed=2000
+    pi.set_servo_pulsewidth(ESC,speed)
+    pi.set_servo_pulsewidth(ESCright,min_value)
+    pi.set_servo_pulsewidth(ESCleft,min_value) 
     
 def left(): #going left
     
-    speed=1800
+    speed=2000
     pi.set_servo_pulsewidth(ESC,speed)
     pi.set_servo_pulsewidth(ESCright,speed)
     pi.set_servo_pulsewidth(ESCleft,min_value) 
-    time.sleep(15)
+    #time.sleep(15)
     
 def right(): #going right
     
-    speed=1800
+    speed=2000
     pi.set_servo_pulsewidth(ESC,speed)
     pi.set_servo_pulsewidth(ESCright,min_value)
     pi.set_servo_pulsewidth(ESCleft,speed)
-    time.sleep(15)
+    #time.sleep(15)
     
 def forward(): #going forward
     
-    speed=1800
+    speed=2000
     pi.set_servo_pulsewidth(ESC,speed)
     pi.set_servo_pulsewidth(ESCright,speed)
     pi.set_servo_pulsewidth(ESCleft,speed)
-    time.sleep(15)
+    #time.sleep(15)
     
 def stop(): #This will stop every action your Pi is performing for ESC ofcourse.
     pi.set_servo_pulsewidth(ESC, 0)
@@ -124,7 +119,22 @@ def arm(): #This is the arming procedure of an ESC
         pi.set_servo_pulsewidth(ESCright, min_value)
         pi.set_servo_pulsewidth(ESCleft, min_value)
         time.sleep(1)
-        control() 
+        speed = 1500 
+        pi.set_servo_pulsewidth(ESC, speed)
+        pi.set_servo_pulsewidth(ESCright, speed)
+        pi.set_servo_pulsewidth(ESCleft, speed)
+        while (speed>=1200):
+            speed-=100
+        pi.set_servo_pulsewidth(ESC, speed)
+        pi.set_servo_pulsewidth(ESCright, speed)
+        pi.set_servo_pulsewidth(ESCleft, speed)
+        while(speed<2000):
+            speed+=100
+            pi.set_servo_pulsewidth(ESC, speed)
+            pi.set_servo_pulsewidth(ESCright, speed)
+            pi.set_servo_pulsewidth(ESCleft, speed)
+            time.sleep(2)
+            control() 
         
 
 
