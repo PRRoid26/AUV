@@ -6,5 +6,4 @@
   <p>has code for running to motors</p>
 <h2>motorRunAuto.py</h2>
   <p>has code for running AUV in All Direction Manually</p>
-  <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fimages%2Fwarning-icon-vector-illustration-of-red-icon-isolated-on-a-transparent-background-circle-shape-hazard-warning-sign-with-exclamation-mark-symbol%2F582662168&psig=AOvVaw2iv9M074utKtAGSQZ-jPzz&ust=1702656444012000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCMiT09anj4MDFQAAAAAdAAAAABAI" alt="Warning Icon">
 <p><b>JUST TYPE ARM TO START PLZ DO NOT CALL CALIBRATE, CALIBRATE FUNCTION ISN'T WORKING IN THIS AND USING IT WILL ONLY MESS UP THE CALIBRATION SO PLZ JUST TYPE "ARM" TO START THE CODE</b></p>
