@@ -10,7 +10,7 @@ os.system("sudo pigpiod")  # Launching GPIO library
 time.sleep(1)  # As I said it is too impatient and so if this delay is removed you will get an error
 import pigpio  # importing GPIO library
 
-ESC = [4,6]# Connect the ESC in this GPIO pin 
+ESC = 17# Connect the ESC in this GPIO pin 
 
 
 pi = pigpio.pi()

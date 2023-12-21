@@ -15,7 +15,7 @@ except Exception as e:
     print("Failed to import GPIO module...")
  
 import server_control
-import socket #server client conn
+import socket
 import time
 import re
 
@@ -33,22 +33,22 @@ class common():
                 time.sleep(3)
         except Exception as e:
             print("Either demon is already running or failed to start: {}".format(e))
+        self.client_conns = None
     
     @staticmethod
-    #socket creation
     def create_socket (host,  tcp_port ):
         server_socket = None
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server_socket.bind((host, tcp_port))#(www:80 personal:1000-10000)
+            server_socket.bind((host, tcp_port))
             server_socket.listen(1)
         except Exception as e:
             print("Failed to create socket: {}".format(e))
         return server_socket
      
   
-    def get_server_socks(self):#get ESCs 
+    def get_server_socks(self):
         servers = {}
         # Read ESC data from config
         for esc, data in ESC_DATA.items():
@@ -62,23 +62,25 @@ class common():
         return servers
         
         
-    def perform_setup(self, server_socks, client_conns): #client conn
+    def perform_setup(self, server_socks, client_conns):
         for esc, s in server_socks.items():
-            client_conns[esc] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_conns[esc] .connect((LOCALHOST, ESC_DATA.get(esc).get('PORT'))) 
-            clientsock, clientAddress = s.accept()
-            client_conns[esc] .sendall(bytes("1500", 'UTF-8'))
-            # print("Connection accepted....")
-            newthread = server_control.ClientThread(clientAddress, clientsock, ESC_DATA.get(esc).get('PORT'), ESC_DATA.get(esc).get('GPIO'))
-            print("Thread created: {}".format(newthread))
-            newthread.start()
-            server_client_threads.append(newthread)
+            if not client_conns.get(esc) :
+                client_conns[esc] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client_conns[esc] .connect((LOCALHOST, ESC_DATA.get(esc).get('PORT')))
+                clientsock, clientAddress = s.accept()
+                client_conns[esc] .sendall(bytes("1500", 'UTF-8'))
+                # print("Connection accepted....")
+                newthread = server_control.ClientThread(clientAddress, clientsock, ESC_DATA.get(esc).get('PORT'), ESC_DATA.get(esc).get('GPIO'))
+                print("Thread created: {}".format(newthread))
+                newthread.start()
+                server_client_threads.append(newthread)
         print("Threads are created for receiving commands for GPIO PWM")
         print(client_conns, server_client_threads)
+        self.client_conns = client_conns
         return (client_conns, server_client_threads)
             
     @staticmethod
-    def get_cmd_data(cmd): #command ka function 
+    def get_cmd_data(cmd):
         data = re.findall(r'esc\d|[0-9]+', cmd)
         esc_val = {}
         if data:
@@ -92,7 +94,35 @@ class common():
                         esc_val[esc] = i
         return esc_val
     
-    def process_run_cmd(self, cmd): 
+    def run_demo(self):
+        # Method to run all ESC in esc_data file under demo mode.
+        i = 1
+        count = 0
+        keep_run = True
+        demo_start_vals = {}
+        for esc in self.client_conns:
+            demostart = ESC_DATA.get(esc).get('DEMO')
+            if demostart:
+                demo_start_vals[esc] = demostart
+        
+        while keep_run:
+            count += i
+            if count >100:
+                i = 100
+            elif count > 10:
+                i = 10
+            else:
+                i = 1
+            for esc in demo_start_vals: 
+                print("sending value {} to gpio pin# {} of esc: {}".format(demo_start_vals[esc], ESC_DATA.get(esc).get('GPIO'), esc))
+                self.client_conns[esc].sendall(bytes(str(demo_start_vals[esc]) ,'UTF-8'))
+                demo_start_vals[esc]  += i
+                if demo_start_vals[esc] >= PWM_MAX_VAL:
+                    keep_run = False
+            time.sleep(2)
+
+    
+    def process_run_cmd(self, cmd):
         # Check whats in command to run..
         esc_val = {}
         if "calibrate" in cmd or "arm"  in cmd or "control" in cmd:
@@ -108,12 +138,14 @@ class common():
                 esc_pgpio_obj.arm()
             else:
                 pass
+        elif "demo" in cmd:
+                self.run_demo()
         else:
                 esc_val = self.get_cmd_data(cmd)
         return esc_val
         
     @staticmethod
-    def add_new_esc(new_esc): #add esc
+    def add_new_esc(new_esc):
         for key in new_esc:
             if key not in ESC_DATA:
                 ESC_DATA.update(new_esc)
@@ -188,6 +220,10 @@ if __name__ == '__main__':
             print("Ending the test and killing all threads..... Bye")
             for client in client_conns.values():
                 client.sendall(bytes('bye', 'UTF-8'))
+                client.close()
+            print("Killing pigpiod demon...")
+            os.system("sudo killall pigpiod")
+            time.sleep(3)
             break
         else: 
             print("Invalid input please try again:    Enter option: s --. Setup; r -->Run Commands;  a--> Add new ESC")

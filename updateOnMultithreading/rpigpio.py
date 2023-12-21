@@ -29,7 +29,8 @@ class HandleGpio():
     def __del__(self):
         # Kill all pwm objs.
         try:
-            self.pi_pwm.stop()
+            if self.pi_pwm:
+                self.pi_pwm.stop()
         except Exception as e:
             print("Fail to stop PWM objs: {}".format(e))
             
@@ -45,6 +46,7 @@ class HandleGpioPgpio(HandleGpio):
         
         self.pi_pwm = pigpio.pi()
         self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, self.pwm_duration)
+        self.pwm_obj_stopped = False
 
     def set_pwm_dur(self, pwm_duration):
         self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, pwm_duration)
@@ -99,7 +101,6 @@ class HandleGpioPgpio(HandleGpio):
             elif inp == "arm":
                 self.arm()
                 break
-            
             else:
                 print("WHAT DID I SAID!! Press a,q,d or e")
 
@@ -118,6 +119,8 @@ class HandleGpioPgpio(HandleGpio):
     def stop(self): # This will stop every action your Pi is performing for ESC ofcourse.
             self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, 0)
             self.pi_pwm.stop()
+            self.pwm_obj_stopped = True
+            print("PWM Obj stopped for gpio Pin: {}".format(self.gpio_pin))
 
     def calibrate(self): # This is the auto calibration procedure of a normal ESC
         self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, 0)
@@ -146,7 +149,9 @@ class HandleGpioPgpio(HandleGpio):
     def __del__(self):
         # Kill all pwm objs.
         try:
-            self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, 0)
-            self.pi_pwm.stop()
+            if not self.pwm_obj_stopped:
+                # print("I see PWM obj is running...{}".format(self.pi_pwm))
+                self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, 0)
+                self.pi_pwm.stop()
         except Exception as e:
             print("Fail to stop PWM objs: {}".format(e))
