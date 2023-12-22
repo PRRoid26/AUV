@@ -39,36 +39,36 @@ class common():
     def create_socket (host,  tcp_port ):#create socket using socket library 
         server_socket = None
         try:
-            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)#socket.socket is a in built function used to create new socket
-            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)#setup socket
-            server_socket.bind((host, tcp_port))#becuz its a server we bind the socket 
-            server_socket.listen(1)#wait for response from socket 
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
+            server_socket.bind((host, tcp_port
+            server_socket.listen(1)
         except Exception as e:
             print("Failed to create socket: {}".format(e))
         return server_socket
      
   
     def get_server_socks(self):
-        servers = {} #empty dictionary to store esc and its socket
+        servers = {} 
         # Read ESC data from config
         for esc, data in ESC_DATA.items():
             port = data.get('PORT')
             if port:
                 server_sock = self.create_socket(LOCALHOST, port)
                 if server_sock:
-                    servers[esc] = server_sock #add to the dictionary 
+                    servers[esc] = server_sock 
             else:
                 print("No PORT configured in ESC_DATA for ESC: {}".format(esc))
         return servers
-        #what is server socket?
+        
         
     def perform_setup(self, server_socks, client_conns):
         for esc, s in server_socks.items():
             if not client_conns.get(esc) :
                 client_conns[esc] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_conns[esc] .connect((LOCALHOST, ESC_DATA.get(esc).get('PORT')))#as its a client we connect
+                client_conns[esc] .connect((LOCALHOST, ESC_DATA.get(esc).get('PORT')))
                 clientsock, clientAddress = s.accept()
-                client_conns[esc] .sendall(bytes("1500", 'UTF-8'))#send data over network by converting it to binary form 
+                client_conns[esc] .sendall(bytes("1500", 'UTF-8')) 
                 # print("Connection accepted....")
                 newthread = server_control.ClientThread(clientAddress, clientsock, ESC_DATA.get(esc).get('PORT'), ESC_DATA.get(esc).get('GPIO'))
                 print("Thread created: {}".format(newthread))
@@ -80,9 +80,9 @@ class common():
         return (client_conns, server_client_threads)
             
     @staticmethod
-    def get_cmd_data(cmd):#takes in command for runnning motor 
+    def get_cmd_data(cmd):
         data = re.findall(r'esc\d|[0-9]+', cmd)
-        esc_val = {} #empty dictionary to hold esc_val 
+        esc_val = {} 
         if data:
             esc = None
             for i in data:
@@ -95,7 +95,7 @@ class common():
         return esc_val
     
     def run_demo(self):
-        # Method to run all ESC in esc_data file under demo mode.
+        
         i = 1
         count = 0
         keep_run = True
@@ -123,7 +123,7 @@ class common():
 
     
     def process_run_cmd(self, cmd):
-        # Check whats in command to run..
+        
         esc_val = {}
         if "calibrate" in cmd or "arm"  in cmd or "control" in cmd:
             esc = re.findall(r'esc\d', cmd)
