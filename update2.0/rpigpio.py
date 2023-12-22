@@ -11,7 +11,7 @@ class HandleGpio():
         
         self.pi_pwm = None
         self.max_duration = (1.0 / frequency) * 1000
-        self.pwmdc = (self.pwm_duration / self.max_duration) *100 #ik it is used in some formula but kounsa; dc ka kya use h?
+        self.pwmdc = (self.pwm_duration / self.max_duration) *100
         
         GPIO.setwarnings(False)			#disable warnings
         GPIO.setmode(GPIO.BOARD)		#set pin numbering system
@@ -105,16 +105,17 @@ class HandleGpioPgpio(HandleGpio):
                 print("WHAT DID I SAID!! Press a,q,d or e")
 
     def arm(self): # This is the arming procedure of an ESC
-        print("Connect the battery and press Enter")
-        inp = input()
-        if inp == '':
-            self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, 0)
-            sleep(1)
-            self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, PWM_MAX_VAL)
-            sleep(1)
-            self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, PWM_MIN_VAL)
-            sleep(1)
-            self.control()
+        #print("Connect the battery and press Enter")
+        print("Starting arming with assumption as battery is connected to ESC")
+        #inp = input()
+        #if inp == '':
+        self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, 0)
+        sleep(1)
+        self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, PWM_MAX_VAL)
+        sleep(1)
+        self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, PWM_MIN_VAL)
+        sleep(1)
+        # self.control()
 
     def stop(self): # This will stop every action your Pi is performing for ESC ofcourse.
             self.pi_pwm.set_servo_pulsewidth(self.gpio_pin, 0)

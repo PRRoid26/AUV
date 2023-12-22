@@ -22,7 +22,7 @@ import re
 
 class common():
     
-    def __init__(self): #load demon 
+    def __init__(self):
         try:
              # start pigpiod demon if not started
             if USE_PIGPIO_MODULE:
@@ -36,39 +36,39 @@ class common():
         self.client_conns = None
     
     @staticmethod
-    def create_socket (host,  tcp_port ):#create socket using socket library 
+    def create_socket (host,  tcp_port ):
         server_socket = None
         try:
-            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)#socket.socket is a in built function used to create new socket
-            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)#setup socket
-            server_socket.bind((host, tcp_port))#becuz its a server we bind the socket 
-            server_socket.listen(1)#wait for response from socket 
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server_socket.bind((host, tcp_port))
+            server_socket.listen(1)
         except Exception as e:
             print("Failed to create socket: {}".format(e))
         return server_socket
      
   
     def get_server_socks(self):
-        servers = {} #empty dictionary to store esc and its socket
+        servers = {}
         # Read ESC data from config
         for esc, data in ESC_DATA.items():
             port = data.get('PORT')
             if port:
                 server_sock = self.create_socket(LOCALHOST, port)
                 if server_sock:
-                    servers[esc] = server_sock #add to the dictionary 
+                    servers[esc] = server_sock
             else:
                 print("No PORT configured in ESC_DATA for ESC: {}".format(esc))
         return servers
-        #what is server socket?
+        
         
     def perform_setup(self, server_socks, client_conns):
         for esc, s in server_socks.items():
             if not client_conns.get(esc) :
                 client_conns[esc] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                client_conns[esc] .connect((LOCALHOST, ESC_DATA.get(esc).get('PORT')))#as its a client we connect
+                client_conns[esc] .connect((LOCALHOST, ESC_DATA.get(esc).get('PORT')))
                 clientsock, clientAddress = s.accept()
-                client_conns[esc] .sendall(bytes("1500", 'UTF-8'))#send data over network by converting it to binary form 
+                client_conns[esc] .sendall(bytes("1500", 'UTF-8'))
                 # print("Connection accepted....")
                 newthread = server_control.ClientThread(clientAddress, clientsock, ESC_DATA.get(esc).get('PORT'), ESC_DATA.get(esc).get('GPIO'))
                 print("Thread created: {}".format(newthread))
@@ -80,9 +80,9 @@ class common():
         return (client_conns, server_client_threads)
             
     @staticmethod
-    def get_cmd_data(cmd):#takes in command for runnning motor 
+    def get_cmd_data(cmd):
         data = re.findall(r'esc\d|[0-9]+', cmd)
-        esc_val = {} #empty dictionary to hold esc_val 
+        esc_val = {}
         if data:
             esc = None
             for i in data:
@@ -100,11 +100,20 @@ class common():
         count = 0
         keep_run = True
         demo_start_vals = {}
+        demo_stop_stats = {}
+        demo_rpigpio_obj = {}
+        
         for esc in self.client_conns:
             demostart = ESC_DATA.get(esc).get('DEMO')
             if demostart:
                 demo_start_vals[esc] = demostart
-        
+                demo_stop_stats[esc] = False
+                gpio_pin = ESC_DATA.get(esc).get('GPIO')
+                demo_rpigpio_obj[esc] = rpigpio.HandleGpioPgpio(gpio_pin, frequency=PWM_FREQUENCY, pwm_duration=0)
+                print("Arming ESC; {}".format(esc))
+                demo_rpigpio_obj[esc].arm()
+                
+        print("***** Khili khuli hai .. Apni demo life ..... *****")
         while keep_run:
             count += i
             if count >100:
@@ -118,9 +127,22 @@ class common():
                 self.client_conns[esc].sendall(bytes(str(demo_start_vals[esc]) ,'UTF-8'))
                 demo_start_vals[esc]  += i
                 if demo_start_vals[esc] >= PWM_MAX_VAL:
-                    keep_run = False
+                    demo_stop_stats[esc] = True
+                    print("Reached max PWM for {}".format(esc))
+                keep_run = not(all(demo_stop_stats.values()))
             time.sleep(2)
-
+        print("All ESCs are at their max value of PWM... Lets stop after 30 Secs... Sleeping ;)")
+        time.sleep(30)
+        for esc in demo_start_vals:
+            demo_rpigpio_obj[esc].stop()
+            self.client_conns[esc].sendall(bytes('bye', 'UTF-8'))
+            self.client_conns[esc].close()
+        print("Killing pigpiod demon...")
+        os.system("sudo killall pigpiod")
+        time.sleep(3)
+        print("***** Puri band hui .. Apni demo life ..... ***** ")
+        return
+        
     
     def process_run_cmd(self, cmd):
         # Check whats in command to run..
@@ -168,68 +190,78 @@ if __name__ == '__main__':
     client_conns = {}
     common_methods = common()
     
-    # Read command from user
-    while True:
-        print("******* User input ********")
-        print("Please select option: s --> Setup; r -->Run Commands;  a--> Add new ESC;  bye --> End the test")
-        operation  = input().lower()
-        
-        if operation != 's' and not server_socks:
-            print ("Setup not ready... ... Proceeding with Setup first..") 
-            server_socks = common_methods. get_server_socks()
-            (client_conns, server_client_threads) = common_methods.perform_setup(server_socks, client_conns)
-            time.sleep(3)
+    # Check if it has to run in Demo mode
+    
+    if DEMO_MODE_ON:
+        print("********* Yuuuhuuuu starting Apani demo life with setup first *********")
+        server_socks = common_methods. get_server_socks()
+        (client_conns, server_client_threads) = common_methods.perform_setup(server_socks, client_conns)
+        time.sleep(3)
+        print("Lets Rock it....")
+        common_methods.run_demo()            
+    else:
+        # Read command from user
+        while True:
+            print("******* User input ********")
+            print("Please select option: s --> Setup; r -->Run Commands;  a--> Add new ESC;  bye --> End the test")
+            operation  = input().lower()
             
-        if operation== 's':
-            print("Setting it up.....")
-            server_socks = common_methods. get_server_socks()
-            (client_conns, server_client_threads) = common_methods.perform_setup(server_socks, client_conns)
-            time.sleep(3)
-            
-        elif operation == 'r':
-            print("Please enter command... Whatever U wants to do man.... with GPIO..:)")
-            cmd = input().lower()
-            esc_val = common_methods.process_run_cmd(cmd)
-            if esc_val:
-                for esc, value in esc_val.items():
-                    client_conns[esc.upper()].sendall(bytes(value,'UTF-8'))
-            else:
-                print("No valid esc number or pwm values in commands....")
+            if operation != 's' and not server_socks:
+                print ("Setup not ready... ... Proceeding with Setup first..") 
+                server_socks = common_methods. get_server_socks()
+                (client_conns, server_client_threads) = common_methods.perform_setup(server_socks, client_conns)
+                time.sleep(3)
                 
-        elif operation == 'a':
-            new_esc = {}
-            print("Adding new ESC: Please enter: ESC#, <GPIO pin#> <port> ")
-            esc_data = input()
-            r = re.findall(r'ESC\d|[0-9]+|[0-9]+', esc_data.upper())
-            if len(r) >=3 and "ESC" in r[0]:
-                if r[2].isdigit():
-                    port = int(r[2])
-                if r[1].isdigit():
-                    gpio = int(r[1])
-                new_esc[r[0]] = {'PORT':port, 'GPIO':gpio}
-                common_methods.add_new_esc(new_esc)
-                # Need to restart the test after addition of new esc 
-                print("Need to restart the test ... killing all threads..... Bye")
+            if operation== 's':
+                print("Setting it up.....")
+                server_socks = common_methods. get_server_socks()
+                (client_conns, server_client_threads) = common_methods.perform_setup(server_socks, client_conns)
+                time.sleep(3)
+                
+            elif operation == 'r':
+                print("Please enter command... Whatever U wants to do man.... with GPIO..:)")
+                cmd = input().lower()
+                esc_val = common_methods.process_run_cmd(cmd)
+                if esc_val:
+                    for esc, value in esc_val.items():
+                        client_conns[esc.upper()].sendall(bytes(value,'UTF-8'))
+                else:
+                    print("No valid esc number or pwm values in commands....")
+                    
+            elif operation == 'a':
+                new_esc = {}
+                print("Adding new ESC: Please enter: ESC#, <GPIO pin#> <port> ")
+                esc_data = input()
+                r = re.findall(r'ESC\d|[0-9]+|[0-9]+', esc_data.upper())
+                if len(r) >=3 and "ESC" in r[0]:
+                    if r[2].isdigit():
+                        port = int(r[2])
+                    if r[1].isdigit():
+                        gpio = int(r[1])
+                    new_esc[r[0]] = {'PORT':port, 'GPIO':gpio}
+                    common_methods.add_new_esc(new_esc)
+                    # Need to restart the test after addition of new esc 
+                    print("Need to restart the test ... killing all threads..... Bye")
+                    for client in client_conns.values():
+                        client.sendall(bytes('bye', 'UTF-8'))
+                    break
+                else:
+                    print("Invalid data please try again")
+                
+            elif operation == 'bye':
+                print("Ending the test and killing all threads..... Bye")
                 for client in client_conns.values():
                     client.sendall(bytes('bye', 'UTF-8'))
+                    client.close()
+                print("Killing pigpiod demon...")
+                os.system("sudo killall pigpiod")
+                time.sleep(3)
                 break
-            else:
-                print("Invalid data please try again")
-            
-        elif operation == 'bye':
-            print("Ending the test and killing all threads..... Bye")
-            for client in client_conns.values():
-                client.sendall(bytes('bye', 'UTF-8'))
-                client.close()
-            print("Killing pigpiod demon...")
-            os.system("sudo killall pigpiod")
-            time.sleep(3)
-            break
-        else: 
-            print("Invalid input please try again:    Enter option: s --. Setup; r -->Run Commands;  a--> Add new ESC")
-            
-        time.sleep(1)
-         
+            else: 
+                print("Invalid input please try again:    Enter option: s --. Setup; r -->Run Commands;  a--> Add new ESC")
+                
+            time.sleep(1)
+             
     """    
     if server_client_threads:
         for th in server_client_threads:
