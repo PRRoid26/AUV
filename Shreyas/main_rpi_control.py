@@ -15,7 +15,7 @@ except Exception as e:
     print("Failed to import GPIO module...")
  
 import server_control
-import socket #server client conn
+import socket 
 import time
 import re
 
@@ -35,7 +35,7 @@ class common():
             print("Either demon is already running or failed to start: {}".format(e))
     
     @staticmethod
-    #socket creation
+   
     def create_socket (host,  tcp_port ):
         server_socket = None
         try:
@@ -48,7 +48,7 @@ class common():
         return server_socket
      
   
-    def get_server_socks(self):#get ESCs 
+    def get_server_socks(self):
         servers = {}
         # Read ESC data from config
         for esc, data in ESC_DATA.items():
@@ -78,7 +78,7 @@ class common():
         return (client_conns, server_client_threads)
             
     @staticmethod
-    def get_cmd_data(cmd): #command ka function 
+    def get_cmd_data(cmd): 
         data = re.findall(r'esc\d|[0-9]+', cmd)
         esc_val = {}
         if data:
