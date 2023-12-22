@@ -11,7 +11,7 @@ class HandleGpio():
         
         self.pi_pwm = None
         self.max_duration = (1.0 / frequency) * 1000
-        self.pwmdc = (self.pwm_duration / self.max_duration) *100 #ik it is used in some formula but kounsa; dc ka kya use h?
+        self.pwmdc = (self.pwm_duration / self.max_duration) *100 
         
         GPIO.setwarnings(False)			#disable warnings
         GPIO.setmode(GPIO.BOARD)		#set pin numbering system
