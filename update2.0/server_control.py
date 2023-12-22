@@ -62,13 +62,15 @@ class ClientThread(threading.Thread):
                         try:
                             self.gpioHandle.set_pwm_dur(int(msg))
                         except Exception as e:
-                            print("Failed to send GPIO PWM value")
+                            print("Failed to send GPIO PWM value for GPIO: {}".format(self.gpio))
             if msg:    
                 print ("From Server: ", msg)
                 self.csocket.send(bytes(msg,'UTF-8'))
             
         print ("Client at ", self.clientAddress , " : ", self.port,  " disconnected...")
-
+        # close the socket connection from client
+        self.csocket.close()
+        self.gpioHandle.pwm_obj_stopped = True
 # Main 
 if __name__ == '__main__':
 
