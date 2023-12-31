@@ -49,7 +49,7 @@ def calibrate():   #This is the auto calibration procedure of a normal ESC
             pi.set_servo_pulsewidth(ESCleft, min_value)
             time.sleep(1)
             print ("See.... uhhhhh")
-            control() # You can change this to any other function you want
+            #control() # You can change this to any other function you want
             
 def neeche(): #going down
     speed=2000
