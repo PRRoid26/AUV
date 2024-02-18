@@ -99,9 +99,9 @@ class common():
         i = 1
         count = 0
         keep_run = True
-        demo_start_vals = {}
-        demo_stop_stats = {}
-        demo_rpigpio_obj = {}
+        demo_start_vals = {}#holds speed
+        demo_stop_stats = {}#if stop
+        demo_rpigpio_obj = {}#to call class RPIGPIO 
         
         for esc in self.client_conns:
             demostart = ESC_DATA.get(esc).get('DEMO')
