@@ -59,11 +59,7 @@ We welcome contributions from the community! If you would like to contribute to 
    ```bash
    git push origin feature-name
    ```
-5. Open a pull request.
-
-Please ensure that your contributions adhere to the project's coding standards and guidelines.
-
-## Contact
+5
 
 For any questions, suggestions, or feedback, please feel free to open an issue in the repository or contact the project maintainer at [shettyprathamesh26@gmail.com].
 
