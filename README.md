@@ -1,7 +1,3 @@
-Sure, I'd be happy to help you create a README file for your GitHub repository. Here's a draft based on the information provided:
-
----
-
 # AUV (Autonomous Underwater Vehicle)
 
 Welcome to the AUV (Autonomous Underwater Vehicle) project repository. This project focuses on the development and implementation of an autonomous underwater vehicle capable of performing various tasks in underwater environments.
